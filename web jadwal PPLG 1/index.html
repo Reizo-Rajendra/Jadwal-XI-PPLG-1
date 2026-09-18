@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jadwal XI PPLG 1 | Premium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS DIGABUNG KE SINI -->
+    <style>
+        :root {
+            --bg-main: #0f1115;
+            --bg-card: #181a20;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --accent: #d4af37; /* Emas premium, bukan neon */
+            --border: #272a35;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* --- ANIMASI OPENING Keren --- */
+        #opening {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100vh;
+            background-color: var(--bg-main);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 1s cubic-bezier(0.8, 0, 0.2, 1);
+        }
+
+        .brand-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .line {
+            width: 50px; height: 1px;
+            background-color: var(--accent);
+            opacity: 0;
+            animation: extendLine 1s ease forwards 0.5s;
+        }
+
+        #opening h1 {
+            font-weight: 300;
+            letter-spacing: 6px;
+            font-size: 2rem;
+            color: var(--text-main);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeUp 1s ease forwards;
+        }
+
+        .loading-text {
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: var(--accent);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            opacity: 0;
+            animation: pulse 1.5s infinite 1.5s;
+        }
+
+        /* --- LAYOUT UTAMA --- */
+        .hide { display: none !important; }
+        .show-app { animation: slideUpApp 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+
+        header {
+            text-align: center;
+            padding: 60px 20px 40px;
+        }
+
+        .school {
+            color: var(--accent);
+            font-size: 0.85rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        header h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-top: 8px;
+            color: var(--text-main);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px 120px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        /* --- CARD JADWAL --- */
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+            border-color: rgba(212, 175, 55, 0.3);
+        }
+
+        .card.today {
+            border: 1px solid var(--accent);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.15);
+            position: relative;
+        }
+
+        .card.today::before {
+            content: 'HARI INI';
+            position: absolute;
+            top: 15px; right: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--bg-main);
+            background-color: var(--accent);
+            padding: 4px 10px;
+            border-radius: 20px;
+            letter-spacing: 1px;
+        }
+
+        .card-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0) 100%);
+        }
+
+        .card-header h3 {
+            font-weight: 600;
+            font-size: 1.3rem;
+            color: var(--text-main);
+        }
+
+        .card-body { padding: 10px 24px 24px; }
+
+        .item {
+            display: flex;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .item:last-child { border-bottom: none; padding-bottom: 0; }
+
+        .time {
+            min-width: 90px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--accent);
+            padding-top: 3px;
+        }
+
+        .details h4 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: var(--text-main);
+        }
+
+        .details p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* --- AI CHAT WIDGET --- */
+        #chat-btn {
+            position: fixed;
+            bottom: 30px; right: 30px;
+            background-color: var(--bg-card);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 14px 24px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+            z-index: 99;
+        }
+
+        #chat-btn:hover { 
+            background-color: var(--accent); 
+            color: var(--bg-main); 
+            border-color: var(--accent);
+        }
+
+        #chat-window {
+            position: fixed;
+            bottom: 90px; right: 30px;
+            width: 350px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-origin: bottom right;
+            z-index: 99;
+        }
+
+        .hide-chat {
+            opacity: 0;
+            transform: scale(0.8) translateY(20px);
+            pointer-events: none;
+        }
+
+        .chat-header {
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .ai-status {
+            display: flex; align-items: center; gap: 8px;
+        }
+        
+        .ai-dot {
+            width: 8px; height: 8px; background-color: var(--accent); border-radius: 50%;
+            box-shadow: 0 0 8px var(--accent);
+        }
+
+        #close-chat {
+            background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer;
+            transition: color 0.3s;
+        }
+        #close-chat:hover { color: var(--accent); }
+
+        .chat-body {
+            height: 300px;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* Custom Scrollbar untuk chat */
+        .chat-body::-webkit-scrollbar { width: 6px; }
+        .chat-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+        .bot-msg, .user-msg {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            animation: msgFadeIn 0.3s ease;
+        }
+
+        .bot-msg { 
+            background-color: #22252e; 
+            align-self: flex-start; 
+            border-bottom-left-radius: 4px;
+        }
+        
+        .user-msg { 
+            background-color: var(--accent); 
+            color: var(--bg-main); 
+            align-self: flex-end; 
+            border-bottom-right-radius: 4px;
+            font-weight: 600;
+        }
+
+        .chat-footer {
+            padding: 15px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-footer input {
+            flex: 1;
+            background-color: var(--bg-main);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 12px 15px;
+            border-radius: 8px;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        .chat-footer input:focus { border-color: var(--accent); }
+
+        .chat-footer button {
+            background-color: var(--accent);
+            color: var(--bg-main);
+            border: none;
+            padding: 0 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: opacity 0.3s;
+        }
+
+        .chat-footer button:hover { opacity: 0.8; }
+
+        /* --- KEYFRAMES --- */
+        @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+        @keyframes extendLine { to { opacity: 1; width: 60px; } }
+        @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+        @keyframes slideUpApp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes msgFadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- RESPONSIVE MOBILE --- */
+        @media (max-width: 768px) {
+            header { padding: 40px 20px 30px; }
+            header h2 { font-size: 2rem; }
+            .container { padding-bottom: 100px; grid-template-columns: 1fr; }
+            #chat-window { width: calc(100% - 40px); right: 20px; bottom: 85px; }
+            #chat-btn { bottom: 20px; right: 20px; }
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- Animasi Opening Keren -->
+    <div id="opening">
+        <div class="brand-container">
+            <span class="line"></span>
+            <h1>XI PPLG 1</h1>
+            <span class="line"></span>
+        </div>
+        <p class="loading-text">Memuat Sistem...</p>
+    </div>
+
+    <!-- Konten Utama (Web Jadwal) -->
+    <main id="app" class="hide">
+        <header>
+            <p class="school">SMKN 8 SEMARANG</p>
+            <h2>Jadwal Pelajaran</h2>
+        </header>
+
+        <div class="container">
+            <!-- SENIN -->
+            <div class="card" id="card-1">
+                <div class="card-header"><h3>Senin</h3></div>
+                <div class="card-body">
+                    <div class="item">
+                        <div class="time">07:00 - 08:30</div>
+                        <div class="details"><h4>POR</h4><p>Dewi Trisnasari, S.Pd (R.5)</p></div>
+                    </div>
+                    <div class="item">
+                        <div class="time">08:30 - 10:00</div>
+                        <div class="details"><h4>MTK</h4><p>Kalim, S.Pd (R.5)</p></div>
+                    </div>
+                    <div class="item">
+                        <div class="time">10:15 - 11:45</div>
+                        <div class="details"><h4>BIN</h4><p>I'anatul Khikmah, S.Pd. (R.5)</p></div>
+                    </div>
+                    <div class="item">
+                        <div class="time">12:30 - 14:00</div>
+                        <div class="details"><h4>BJW</h4><p>Choiriyah, S.Pd., M.Pd. (R.5)</p></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SELASA -->
+            <div class="card" id="card-2">
+                <div class="card-header"><h3>Selasa</h3></div>
+                <div class="card-body">
+                    <div class="item">
+                        <div class="time">07:00 - 09:15</div>
+                        <div class="details"><h4>GIM</h4><p>Rinar Adi Cahyono, S.Kom (Lab PPLG 2)</p></div>
+                    </div>
+                    <div class="item">
+                        <div class="time">09:30 - 11:45</div>
+                        <div class="details"><h4>PBM</h4><p>Dian Nirmala Santi, S.Kom (Lab PPLG 2)</p></div>
+                    </div>
+                    <div class="item">
+                        <div class="time">12:30 - 15:30</div>
+                        <div class="details"><h4>KIK</h4><p>Annisa Suci Ferdiana, S.Pd. (Lab PPLG 2)</p></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RABU -->
+            <div class="card" id="card-3">
+                <div class="card-header"><h3>Rabu</h3></div>
+                <div class="card-body">
+                    <div class="item">
+                        <div class="time">07:00 - 08:30</div>
+                        <div class="details"><h4>PTGM</h4><p>Dian Nirmala Santi, S.Kom (R.11)</p></div>
+                    </div>
+                    <div class="item">
+                        <div class="time">08:30 - 10:00</div>
+                        <div class="details"><h4>PABP</h4><p>Guru Agama (R.11)</p></div>
+                    </div>
+                    <div class="item">
+                        <div class="time">10:15 - 11:45</div>
+                        <div class="details"><h4>SJR</h4><p>Ever Nicolas, S.Pd (R.11)</p></div>
+                    </div>
+                    <div class="item">
+                        <div class="time">12:30 - 14:00</div>
+                        <div class="details"><h4>BNG</h4><p>Sri Astuti Setiani, S.Pd (R.11)</p></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KAMIS -->
+            <div class="card" id="card-4">
+                <div class="card-header"><h3>Kamis</h3></div>
+                <div class="card-body">
+                    <div class="item">
+                        <div class="time">07:00 - 08:30</div>
+                        <div class="details"><h4>PPS</h4><p>Sri Astuti Setiani, S.Pd (R.10)</p></div>
+                    </div>
+                    <div class="item">
+                        <div class="time">08:30 - 10:00</div>
+                        <div class="details"><h4>BJP</h4><p>Ever Nicolas, S.Pd (R.10)</p></div>
+                    </div>
+                    <div class="item">
+                        <div class="time">10:15 - 11:45</div>
+                        <div class="details"><h4>BNG</h4><p>Dwi Nugrahenni, S.Pd (R.10)</p></div>
+                    </div>
+                    <div class="item">
+                        <div class="time">12:30 - 14:00</div>
+                        <div class="details"><h4>BDT</h4><p>Dian Nirmala Santi, S.Kom (R.10)</p></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- JUMAT -->
+            <div class="card" id="card-5">
+                <div class="card-header"><h3>Jumat</h3></div>
+                <div class="card-body">
+                    <div class="item">
+                        <div class="time">07:00 - 09:15</div>
+                        <div class="details"><h4>PTGM</h4><p>Dian Nirmala Santi, S.Kom (Lab PPLG 4)</p></div>
+                    </div>
+                    <div class="item">
+                        <div class="time">09:30 - 11:45</div>
+                        <div class="details"><h4>KIK</h4><p>Annisa Suci Ferdiana, S.Pd. (Lab PPLG 4)</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI CHAT WIDGET -->
+        <button id="chat-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            Tanya AI
+        </button>
+        
+        <div id="chat-window" class="hide-chat">
+            <div class="chat-header">
+                <div class="ai-status">
+                    <div class="ai-dot"></div>
+                    <span>Jadwal AI</span>
+                </div>
+                <button id="close-chat">&times;</button>
+            </div>
+            <div class="chat-body" id="chat-body">
+                <div class="bot-msg">Halo! Butuh info jadwal hari ini atau hari apa? Ketik aja "jadwal hari ini" 🚀</div>
+            </div>
+            <div class="chat-footer">
+                <input type="text" id="chat-input" placeholder="Tanya jadwal...">
+                <button id="send-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- JAVASCRIPT DIGABUNG KE SINI -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // 1. KONTROL ANIMASI OPENING
+            const opening = document.getElementById("opening");
+            const app = document.getElementById("app");
+
+            // Tahan layar loading selama 2.5 detik biar kerasa premium
+            setTimeout(() => {
+                opening.style.opacity = "0";
+                setTimeout(() => {
+                    opening.style.display = "none";
+                    app.classList.remove("hide");
+                    app.classList.add("show-app");
+                }, 1000); // Tunggu efek transisi CSS selesai
+            }, 2500);
+
+            // 2. DETEKSI HARI INI SECARA OTOMATIS
+            const currentDay = new Date().getDay(); // 0=Minggu, 1=Senin, ..., 5=Jumat
+            if(currentDay >= 1 && currentDay <= 5) {
+                // Tambahkan efek glow dan label "HARI INI" ke kartu jadwal hari ini
+                const todayCard = document.getElementById(`card-${currentDay}`);
+                if(todayCard) {
+                    todayCard.classList.add('today');
+                }
+            }
+
+            // 3. LOGIKA AI CHATBOT JADWAL
+            const chatBtn = document.getElementById("chat-btn");
+            const chatWindow = document.getElementById("chat-window");
+            const closeChat = document.getElementById("close-chat");
+            const sendBtn = document.getElementById("send-btn");
+            const chatInput = document.getElementById("chat-input");
+            const chatBody = document.getElementById("chat-body");
+
+            // Data Database AI
+            const dataJadwal = {
+                1: "Jadwal Senin: POR (07:00), Matematika (08:30), Bahasa Indonesia (10:15), dan BJW (12:30). Ruang kelas 5.",
+                2: "Jadwal Selasa: GIM (07:00), PBM (09:30), dan KIK (12:30). Semuanya di Lab PPLG 2.",
+                3: "Jadwal Rabu: PTGM (07:00), Agama (08:30), Sejarah (10:15), dan BNG (12:30). Ruang 11.",
+                4: "Jadwal Kamis: PPS (07:00), BJP (08:30), BNG (10:15), dan BDT (12:30). Ruang 10.",
+                5: "Jadwal Jumat: PTGM (07:00) dan KIK (09:30) di Lab PPLG 4. Hari ini pulang cepat!"
+            };
+
+            // Buka/Tutup Chat
+            chatBtn.addEventListener("click", () => chatWindow.classList.toggle("hide-chat"));
+            closeChat.addEventListener("click", () => chatWindow.classList.add("hide-chat"));
+
+            function sendMessage() {
+                const text = chatInput.value.trim().toLowerCase();
+                if (!text) return;
+
+                // Tampilkan Pesan User
+                addMessage(chatInput.value, "user-msg");
+                chatInput.value = "";
+
+                // Efek "Sedang Mengetik..."
+                const typingMsg = document.createElement("div");
+                typingMsg.className = "bot-msg";
+                typingMsg.textContent = "AI sedang mengetik...";
+                chatBody.appendChild(typingMsg);
+                chatBody.scrollTop = chatBody.scrollHeight;
+
+                // Proses AI (dengan sedikit jeda delay buatan)
+                setTimeout(() => {
+                    chatBody.removeChild(typingMsg); // Hapus tulisan sedang mengetik
+                    
+                    if (text.includes("hari ini") || text.includes("sekarang")) {
+                        if (currentDay >= 1 && currentDay <= 5) {
+                            addMessage(`Ini dia jadwal hari ini (${getNamaHari(currentDay)}): ` + dataJadwal[currentDay], "bot-msg");
+                        } else {
+                            addMessage("Hari ini libur cuy! Istirahat santai dulu aja 🎮", "bot-msg");
+                        }
+                    } else if (text.includes("senin")) addMessage(dataJadwal[1], "bot-msg");
+                    else if (text.includes("selasa")) addMessage(dataJadwal[2], "bot-msg");
+                    else if (text.includes("rabu")) addMessage(dataJadwal[3], "bot-msg");
+                    else if (text.includes("kamis")) addMessage(dataJadwal[4], "bot-msg");
+                    else if (text.includes("jumat")) addMessage(dataJadwal[5], "bot-msg");
+                    else if (text.includes("besok")) {
+                         let besok = currentDay + 1;
+                         if (besok > 5 || besok === 0) addMessage("Besok libur cuy! Aman.", "bot-msg");
+                         else addMessage(`Jadwal besok (${getNamaHari(besok)}): ` + dataJadwal[besok], "bot-msg");
+                    }
+                    else {
+                        addMessage("Waduh, AI kurang ngerti. Coba sebutkan spesifik, misalnya: 'jadwal besok', 'jadwal hari ini', atau 'jadwal rabu'.", "bot-msg");
+                    }
+                }, 800); // 800ms jeda mikir AI
+            }
+
+            // Fungsi tambah bubble chat ke UI
+            function addMessage(text, className) {
+                const msgDiv = document.createElement("div");
+                msgDiv.className = className;
+                msgDiv.textContent = text;
+                chatBody.appendChild(msgDiv);
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }
+
+            // Fungsi konversi angka hari ke string
+            function getNamaHari(angka) {
+                const nama = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+                return nama[angka];
+            }
+
+            // Event Listener Klik & Enter Keyboard
+            sendBtn.addEventListener("click", sendMessage);
+            chatInput.addEventListener("keypress", (e) => {
+                if (e.key === "Enter") sendMessage();
+            });
+        });
+    </script>
+</body>
+</html>
